@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import List from './components/List';
 import Alert from './components/Alert';
 function App() {
-  const [name, setName] = useState('');
+  const [itemTitle, setItemTitle] = useState('');
   const [list, setList] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -14,19 +14,29 @@ function App() {
 
   const handleSubmit =(e)=> {
     e.preventDefault();
-    if(!name){
+    if(!itemTitle){
       // setAlert({show:true, msg: 'please enter value', type: 'danger'})
       //above is legit too, but you can do it like this as well in order not to have to repeat it later:
       showAlert(true, 'danger', 'please enter value')
     }
-    else if(name && isEditing){
+    else if(itemTitle && isEditing){
       // deal with edit
+      setList(list.map((item)=> {
+        if(item.id === editId){
+          return {...item, title:itemTitle}
+        }
+        return item
+      }))
+      setItemTitle('');
+      setEditId(null);
+      setIsEditing(false);
+      showAlert(true, 'success', 'value changed')
     }
     else{
       showAlert(true, 'success', 'a new item added')
-      const newItem = {id: new Date().getTime().toString(), title: name};
+      const newItem = {id: new Date().getTime().toString(), title: itemTitle};
       setList([...list, newItem]);
-      setName('');
+      setItemTitle('');
     }
   }
 
@@ -36,17 +46,26 @@ function App() {
 
   const handleClearItems = ()=> {
     setList([]);
+    showAlert(true, 'danger', 'the list is cleared')
   }
 
   const removeItem = (id)=> {
-   const newList = list.filter((item)=> item.id !== id)
-   setList(newList);
-  };
+    const newList = list.filter((item)=> item.id !== id)
+    setList(newList);
+    showAlert(true, 'danger', 'item removed')
+  }
+
+  const editItem = (anId)=> {
+    const itemToEdit = list.find((item)=> item.id === anId);
+    setIsEditing(true);
+    setEditId(anId);
+    setItemTitle(itemToEdit.title);
+  }
 
   return (
     <section className="section-center">
       <form onSubmit={handleSubmit} className="grocery-form">
-        {alert.show && <Alert {...alert} removeAlert={showAlert} />}
+        {alert.show && <Alert {...alert} removeAlert={showAlert} list={list} />}
 
         <h3>grocery list</h3>
         <div className="form-control">
@@ -54,8 +73,8 @@ function App() {
             type="text" 
             className='grocery' 
             placeholder='e.g. eggs' 
-            value={name} 
-            onChange={(e)=> setName(e.target.value)}
+            value={itemTitle} 
+            onChange={(e)=> setItemTitle(e.target.value)}
           />
           <button className='submit-btn' type='submit'>
             {isEditing ? 'edit' : 'submit'}
@@ -64,7 +83,7 @@ function App() {
       </form>
       {list.length > 0 && 
       <div className="grocery-container">
-      <List items={list} removeItem={removeItem}/>
+      <List list={list} removeItem={removeItem} editItem={editItem}/>
       <button className="clear-btn" onClick={handleClearItems}>clear items</button>
     </div>}
       
