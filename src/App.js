@@ -23,14 +23,9 @@ function App() {
       // deal with edit
     }
     else{
-      // show alert
+      showAlert(true, 'success', 'a new item added')
       const newItem = {id: new Date().getTime().toString(), title: name};
       setList([...list, newItem]);
-      setAlert({
-        show:false,
-        msg: '',
-        type: ''
-      })
       setName('');
     }
   }
@@ -52,7 +47,7 @@ function App() {
         <div className="form-control">
           <input 
             type="text" 
-            className='frocery' 
+            className='grocery' 
             placeholder='e.g. eggs' 
             value={name} 
             onChange={(e)=> setName(e.target.value)}
